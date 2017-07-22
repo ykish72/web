@@ -79,10 +79,29 @@ var options = {
 		duration: 1500
 	}
 };
-     function showToast(str) {
-        iqwerty.toast.Toast(str, options);
-    }  
 
+/* toast 보여주기 함수 */
+function showToast(str) {
+  iqwerty.toast.Toast(str, options);
+}  
+
+/* 소리 내기 함수 */
+function sound(src) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    document.body.appendChild(this.sound);
+    this.play = function(){
+        this.sound.play();
+    }
+    this.stop = function(){
+        this.sound.pause();
+    }
+}
+
+/* 순서섞기 함수 */
 (function($){
 
     $.fn.shuffle = function() {
@@ -132,8 +151,13 @@ _.templateSettings = {
 
 var choosedOne = undefined;
 var choosedIdx = undefined;
+var successSound;
+var failSound;
+
 $(document).ready(function(){
-  
+  successSound = new sound("NFF-choice-good.wav");
+  failSound = new sound("NFF-confirm-02.wav");
+
   initCards('.content', cardType, cardTotal);
   $(".card").each( function(i, el){
     $(el).flip({trigger:'click'}).flip(true);
@@ -153,15 +177,17 @@ $(document).ready(function(){
       if (choosedOne != name) {
         var this_ = this;
         //틀리니까 원래대로 뒤집어요.
-          showToast("You are wrong.");
+        showToast("틀렸네요.ㅠ"); //You are wrong.
+        failSound.play();
         setTimeout(function() {
           $("div[data-index="+ choosedIdx+"]").flip(true);
           $(this_).parent().flip(true);
         }, 1500);
       } else {
         // 맞췄음. 두 개의 card를 사라지게 한다.
-        showToast("You got it.");
-        setTimeout(function() {
+        showToast("맞췄어요.ㅎ"); // You got it
+        successSound.play();
+        setTimeout(function() { //약간의 시간 뒤 card를 사라지게 함.
           $("div[data-name=" + name + "]").css('visibility', 'hidden'); // visible
         }, 1500)
       }
