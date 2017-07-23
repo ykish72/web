@@ -12,11 +12,14 @@ Released under the MIT license: http://jsbin.mit-license.org
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="혜린이와 아빠의 javascript 공부하기. 1단계로 간단히 카드 짝 맞으면 사라지고, 틀리면 다시 덮힘. 다음 2단게로 점수 기능등 추가 예정.">
-  <title>혜리니네 카드짝 맞추기</title>
+  <meta name="description" content="리니와 아빠의 javascript 공부하기. 1단계로 간단히 카드 짝 맞으면 사라지고, 틀리면 다시 덮힘. 다음 2단게로 점수 기능등 추가 예정.">
+  <title>리니네 카드짝 맞추기</title>
   <script src="https://code.jquery.com/jquery.min.js"></script>
-<link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" type="text/css" />
+<!--<link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" type="text/css" />
 <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+-->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://cdn.rawgit.com/nnattawat/flip/master/dist/jquery.flip.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 <script type="text/javascript" src="toast.min.js"></script>
@@ -29,6 +32,7 @@ Released under the MIT license: http://jsbin.mit-license.org
   }
 
 .header {
+  position: fixed;
   background: blue;
   color: white;
   width: 100%;
@@ -36,10 +40,15 @@ Released under the MIT license: http://jsbin.mit-license.org
   margin: 0;
   padding: 0;
 }
-.content {
-  position:absolute;
+
+.contentfix {
+  position:fixed; /*absolute;*/
   top: 3em;
   bottom: 0;
+  width: 100%;
+  overflow-y: auto;
+}
+.content {
   width: 100%;
 }
 .card {
@@ -49,6 +58,7 @@ Released under the MIT license: http://jsbin.mit-license.org
 }
 .front, back {
   width:100%; height:100%;
+  text-align: center;
 }
 #nTurn {
   display: inline-block;
@@ -59,6 +69,12 @@ Released under the MIT license: http://jsbin.mit-license.org
   padding:2px;
   border: 1px solid gray;
 }
+.front .glyphicon {
+  color: black;
+  font-size: 3.5em;
+  margin-top: 0.25em; /* 카드 기본 마진이 있어서, 이정도만 주면 세로 중앙 정렬이 되는 것처럼 보임 */
+}
+
 </style>
 </head>
 <body>
@@ -68,7 +84,7 @@ Released under the MIT license: http://jsbin.mit-license.org
       횟수: <span id="nTurn"> 0</span>
 
     </div>
-  <div class='content'>content</div>
+  <div class='contentfix'><div class='content'>content</div></div>
 <script id="jsbin-javascript">
 
   var nTurns = 0;
@@ -118,21 +134,31 @@ function sound(src) {
 })(jQuery);
 
 
-var cardType = 'color'; // img, color
+var cardType = 'icon'; // img, color, icon
 var cardTotal = 16; //32;
 var colorArray = ['Aqua', 'Aquamarine', 'Beige', 'Black', 'Blue', 'BlueViolet', 'Brown', 'BurlyWood',
                 'Yellow', 'Chartreuse', 'Coral', 'CornflowerBlue', 'Crimson', 'Cyan' ,'Red', 'Green'  ]
-
+var iconArray = ['heart','ok','home','lock','volume-down','thumbs-up','music','star',
+'remove','flag','camera','stop','gift','qrcode','screenshot','leaf','envelope'
+]
 
 function initCards(pid, ctype, cardTotal_) {
   var html="";
   var cardCnt = cardTotal_ / 2;
-  var newCArry_ = colorArray.slice(0, cardCnt);
-  var newCArry = $.shuffle( newCArry_.concat(colorArray.slice(0, cardCnt)) );
+  var arry;
+  if (ctype == 'color')
+    arry = colorArray;
+  else (ctype = 'icon')
+    arry = iconArray;
+  var newCArry_ = arry.slice(0, cardCnt); // 실제 사용할 카드 갯수만큼 잘라냄.
+  var newCArry = $.shuffle( newCArry_.concat(arry.slice(0, cardCnt)) ); // 카드를 섞음.
   
   for (var i=0; i< newCArry.length; i++) {
       var c = newCArry[i];
-      var txt = $("#t_card").html();
+      if (ctype == 'color')
+        var txt = $("#t_card").html();
+      else if (ctype == 'icon')
+        var txt = $("#t_cardicon").html();
       var ret = _.template(txt,{c:c, i:i})
       html += ret;
   }
@@ -219,6 +245,16 @@ $(document).ready(function(){
 <script type="text/html" id="t_card">
 <div class="card" data-name="<@=c@>" data-index="<@=i@>"> 
   <div class="front" style="background-color:<@=c@>" > 
+  </div> 
+  <div class="back" style="background-color:gray">
+  </div> 
+</div>
+</script>
+
+<script type="text/html" id="t_cardicon">
+<div class="card" data-name="<@=c@>" data-index="<@=i@>"> 
+  <div class="front" > 
+    <span class="glyphicon glyphicon-<@=c@>"></span>
   </div> 
   <div class="back" style="background-color:gray">
   </div> 
