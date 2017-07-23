@@ -217,13 +217,15 @@ $(document).ready(function(){
       var this_ = this;
       //a. 틀리니까 원래대로 뒤집어요.
       // 잠깐 기다렸다가 카드를 되돌려 놓음.
-      setTimeout(function() {
+      setTimeout(function(){ // 틀렸다는 말이 바로 뜨는게 싫고, 그 순간 바로 flip이 되는게 싫어. 별개의 setTimeout사용.(취향)
         showToast("틀렸네요.ㅠ"); //You are wrong.
-        failSound.play();
+        failSound.play(); 
+      }, 1000)
+      setTimeout(function() {
         $("div[data-index="+ choosedIdx+"]").flip(true);
         $(this_).flip(true); //parent().
         disableClick = false;
-      }, 1000);
+      }, 1500);
     } else {
       //b. 맞췄음. 두 개의 card를 사라지게 한다.
       setTimeout(function() { //약간의 시간 뒤 card를 사라지게 함.
@@ -232,7 +234,7 @@ $(document).ready(function(){
         // 두 개가 맞으므로, 같은 카드 이름을 한꺼번에 사라지도록 처리하면 됨.
         $("div[data-name=" + name + "]").css({opacity:1.0, visibility:'visible'}).animate({opacity:0}, 1000); // animate를 이용해 1초 안에 투명하게 해서 사라짐 처리.
         disableClick = false;
-      }, 1000) 
+      }, 500) 
     }
 
     choosedOne = undefined;
