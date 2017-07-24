@@ -12,7 +12,7 @@ Released under the MIT license: http://jsbin.mit-license.org
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="리니와 아빠의 javascript 공부하기. 1단계로 간단히 카드 짝 맞으면 사라지고, 틀리면 다시 덮힘. 다음 2단게로 점수 기능등 추가 예정.">
+  <meta name="description" content="리니와 아빠의 javascript 공부하기. 1단계로 간단히 카드 짝 맞으면 사라지고, 틀리면 다시 덮힘. 다음 2단계로 점수 기능등 추가 예정.">
   <title>리니네 카드짝 맞추기</title>
   <script src="https://code.jquery.com/jquery.min.js"></script>
 <!--<link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" type="text/css" />
@@ -194,6 +194,9 @@ $(document).ready(function(){
   // main event. 카드 선택시 뒤집어 주기, 맞거나 다를때 처리.
   $(".card").click(function() { // $(".front .back").click() 쓰다가 상위 div를 체크하는 .card로 대체. 부모 div에서 처리하는게 덜 복잡함. ykish 2017.07.23
   
+    if ( $(this).data('flip-model').isFlipped == false) { // 뒤집어 져 있지 않은 카드이면 - 그림이 보이는 카드는 클릭 되지 않는다.
+      return;
+    }
     if (disableClick) { // 이미 두개의 카드를 선택한 경우, 일시적으로 더이상 누를 수 없다는 것을 알려주기 위해 소리를 내주고 종료.
       noclickSound.play();
       return;
