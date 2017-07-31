@@ -15,9 +15,6 @@ Released under the MIT license: http://jsbin.mit-license.org
   <meta name="description" content="리니와 아빠의 javascript 공부하기. 1단계로 간단히 카드 짝 맞으면 사라지고, 틀리면 다시 덮힘. 다음 2단계로 점수 기능등 추가 예정.">
   <title>리니네 카드짝 맞추기</title>
   <script src="https://code.jquery.com/jquery.min.js"></script>
-<!--<link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" type="text/css" />
-<script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
--->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://cdn.rawgit.com/nnattawat/flip/master/dist/jquery.flip.min.js"></script>
@@ -79,15 +76,14 @@ Released under the MIT license: http://jsbin.mit-license.org
 </head>
 <body>
   <div class='header'>
-    <div style="padding:8px;">카드짝 맞추기</div>
+    <div style="padding:8px;" onclick='func1();'>카드짝 맞추기</div>
     <div style="position:absolute;right:15px;top: 5px;">
       횟수: <span id="nTurn"> 0</span>
 
     </div>
-  <div class='contentfix'><div class='content'>content</div></div>
+  <div class='contentfix'><div class='content'>content</div>
+  </div>
 <script id="jsbin-javascript">
-
-  var nTurns = 0;
 
 var options = {
 	settings: {
@@ -95,6 +91,9 @@ var options = {
 	}
 };
 
+function func1() {
+   // $("#completeModal").appendTo("body").modal('show'); // bootstrap 모달이 제대로 안떠서, 검색해보니 이리 나옴. 이유는 모르지만 잘됨.
+}
 /* toast 보여주기 함수 */
 function showToast(str) {
   iqwerty.toast.Toast(str, options);
@@ -142,7 +141,10 @@ var iconArray = ['heart','ok','home','lock','volume-down','thumbs-up','music','s
 'remove','flag','camera','stop','gift','qrcode','screenshot','leaf','envelope'
 ]
 
+var nTurns = 0;
+
 function initCards(pid, ctype, cardTotal_) {
+  nTurns = 0;
   var html="";
   var cardCnt = cardTotal_ / 2;
   var arry;
@@ -163,6 +165,7 @@ function initCards(pid, ctype, cardTotal_) {
       html += ret;
   }
   $(pid).html(html);
+  $("#nTurn").html(nTurns);
 }
 
 // underscore template에 %대신 @를 구분자용도로 사용함을 지정.
@@ -180,19 +183,8 @@ var failSound;
 var noclickSound;
 
 var disableClick = false;
-$(document).ready(function(){
-  // 사용할 사운드 초기화.
-  successSound = new sound("sound/NFF-choice-good.wav");
-  failSound = new sound("sound/NFF-confirm-02.wav");
-  noclickSound = new sound("sound/Windows Default.wav");
 
-  initCards('.content', cardType, cardTotal); // 카드 뒤섞기, 배치.
-  $(".card").each( function(i, el){ // 카드 뒤집기 기능 초기화.
-    $(el).flip({trigger:'manual'}).flip(true); // click -> manual. ykish 2017.07.22
-  })
-
-  // main event. 카드 선택시 뒤집어 주기, 맞거나 다를때 처리.
-  $(".card").click(function() { // $(".front .back").click() 쓰다가 상위 div를 체크하는 .card로 대체. 부모 div에서 처리하는게 덜 복잡함. ykish 2017.07.23
+var cardClick = function() { // $(".front .back").click() 쓰다가 상위 div를 체크하는 .card로 대체. 부모 div에서 처리하는게 덜 복잡함. ykish 2017.07.23
   
     if ( $(this).data('flip-model').isFlipped == false) { // 뒤집어 져 있지 않은 카드이면 - 그림이 보이는 카드는 클릭 되지 않는다.
       return;
@@ -235,14 +227,42 @@ $(document).ready(function(){
         showToast("맞췄어요.ㅎ"); // You got it
         successSound.play();
         // 두 개가 맞으므로, 같은 카드 이름을 한꺼번에 사라지도록 처리하면 됨.
-        $("div[data-name=" + name + "]").css({opacity:1.0, visibility:'visible'}).animate({opacity:0}, 1000); // animate를 이용해 1초 안에 투명하게 해서 사라짐 처리.
-        disableClick = false;
+        $("div[data-name=" + name + "]").css({opacity:1.0, visibility:'visible'}).animate({opacity:0}, 1000, '', function() {
+          disableClick = false;
+          var jq = $("div.content div.back[style*='z-index: 1']"); // 뒤집어진 카드의 갯수. 방법은 여러가지가 있겠으나, 그냥 이 방법.
+          if (jq.length == 0) {
+            $("#myTurns").text(nTurns);
+            $("#completeModal").appendTo("body").modal('show');
+          }
+        }); // animate를 이용해 1초 안에 투명하게 해서 사라짐 처리.
       }, 500) 
     }
 
     choosedOne = undefined;
     
+  }
+$(document).ready(function(){
+  $('#completeModal').on('hidden.bs.modal', function () {
+      initCards('.content', cardType, cardTotal); // 카드 뒤섞기, 배치.
+      $(".card").each( function(i, el){ // 카드 뒤집기 기능 초기화.
+        $(el).flip({trigger:'manual'}).flip(true); // click -> manual. ykish 2017.07.22
+      })
+
+      // main event. 카드 선택시 뒤집어 주기, 맞거나 다를때 처리.
+      $(".card").click(cardClick);
   })
+  // 사용할 사운드 초기화.
+  successSound = new sound("sound/NFF-choice-good.wav");
+  failSound = new sound("sound/NFF-confirm-02.wav");
+  noclickSound = new sound("sound/Windows Default.wav");
+
+  initCards('.content', cardType, cardTotal); // 카드 뒤섞기, 배치.
+  $(".card").each( function(i, el){ // 카드 뒤집기 기능 초기화.
+    $(el).flip({trigger:'manual'}).flip(true); // click -> manual. ykish 2017.07.22
+  })
+
+  // main event. 카드 선택시 뒤집어 주기, 맞거나 다를때 처리.
+  $(".card").click(cardClick);
 });
 </script>
 
@@ -265,6 +285,26 @@ $(document).ready(function(){
   </div> 
 </div>
 </script>
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="completeModal" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">환영</h4>
+        </div>
+        <div class="modal-body">
+          <p>모든 카드를 다 맞추셨습니다. 축하합니다.</p>
+          <p> 맞춘 횟수 : <span id='myTurns'></span></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
